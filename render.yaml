@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: clinical-trials-api
+    runtime: docker
+    plan: standard
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080
+    disk:
+      name: trials-db
+      mountPath: /app
+      sizeGB: 10
