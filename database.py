@@ -63,8 +63,8 @@ def init_db() -> None:
         conn.execute(CREATE_INDEX)
 
 
-def upsert(trial: dict) -> None:
-    """Insert a trial or update it if the nct_id already exists."""
+def _serialize(trial: dict) -> dict:
+    """Serialize a normalized trial dict for SQLite storage."""
     row = {}
     for key, value in trial.items():
         if key in LIST_FIELDS:
@@ -73,17 +73,37 @@ def upsert(trial: dict) -> None:
             row[key] = 1 if value else 0
         else:
             row[key] = value
+    return row
 
+
+def upsert(trial: dict) -> None:
+    """Insert a trial or update it if the nct_id already exists."""
+    row = _serialize(trial)
     columns = ", ".join(row.keys())
     placeholders = ", ".join("?" * len(row))
     updates = ", ".join(f"{k} = excluded.{k}" for k in row if k != "nct_id")
-
     sql = f"""
         INSERT INTO trials ({columns}) VALUES ({placeholders})
         ON CONFLICT(nct_id) DO UPDATE SET {updates};
     """
     with _connect() as conn:
         conn.execute(sql, list(row.values()))
+
+
+def upsert_many(trials: list[dict]) -> None:
+    """Upsert a batch of trials in a single transaction."""
+    if not trials:
+        return
+    rows = [_serialize(t) for t in trials]
+    columns = ", ".join(rows[0].keys())
+    placeholders = ", ".join("?" * len(rows[0]))
+    updates = ", ".join(f"{k} = excluded.{k}" for k in rows[0] if k != "nct_id")
+    sql = f"""
+        INSERT INTO trials ({columns}) VALUES ({placeholders})
+        ON CONFLICT(nct_id) DO UPDATE SET {updates};
+    """
+    with _connect() as conn:
+        conn.executemany(sql, [list(r.values()) for r in rows])
 
 
 def get_since(date_str: str) -> list[dict]:
