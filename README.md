@@ -6,7 +6,7 @@ A lightweight ETL pipeline that pulls data from [ClinicalTrials.gov API v2](http
 
 ## What this project does
 
-1. **Full load** (`load.py`) — fetches all ~572k trials from ClinicalTrials.gov and stores them in a local SQLite database (`trials.db`)
+1. **Full load** (`load.py`) — fetches all ~572k trials from ClinicalTrials.gov and stores them in a local SQLite database (`trials.db`). Only runs once on first deploy when the DB is empty — subsequent deploys skip this step.
 2. **Daily sync** (`sync.py`) — fetches only trials updated since yesterday and upserts them, keeping the DB current
 3. **API** (`api.py`) — serves trial data over HTTP so downstream systems (e.g. OpenAlex) can query by last-updated date
 
@@ -23,6 +23,8 @@ pip install -r requirements.txt
 ```bash
 python load.py
 ```
+
+> On Render, this runs automatically on first deploy via `start.sh` when the DB is empty. Subsequent deploys skip it.
 
 ### Start the API
 ```bash
