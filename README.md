@@ -93,10 +93,17 @@ python sync.py
 
 ## How the sync works
 
-1. `sync.py` runs daily (cron or Render cron job)
-2. It calls `fetch_trials(since_date=yesterday)` — ClinicalTrials.gov supports date-range filtering natively via `AREA[LastUpdatePostDate]RANGE[date,MAX]`
+The daily sync is handled by APScheduler running inside the FastAPI process — no external cron job or Render cron service needed. On app startup, a background scheduler is registered that fires `sync.main()` every day at 2am UTC.
+
+1. At 2am UTC, the scheduler calls `sync.py` — no external trigger required
+2. `sync.py` calls `fetch_trials(since_date=yesterday)` — ClinicalTrials.gov supports date-range filtering natively via `AREA[LastUpdatePostDate]RANGE[date,MAX]`
 3. All returned trials are upserted (`INSERT ... ON CONFLICT DO UPDATE`) so new trials are added and updated trials overwrite the old record
 4. The `last_updated` index ensures `get_since()` queries stay fast even at 572k rows
+
+To trigger a sync manually (e.g. to backfill missed days):
+```
+GET /sync
+```
 
 ---
 
