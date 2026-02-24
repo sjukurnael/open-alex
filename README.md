@@ -124,4 +124,5 @@ This returns only trials that changed since that date, keeping the integration l
 - **No async fetching** — the fetcher uses synchronous `httpx` with `sleep(0.5)`. An async fetcher could be ~5x faster but adds complexity and risks hitting rate limits.
 - **No authentication on the API** — appropriate for an internal service; add an API key header if this becomes public-facing.
 - **Render persistent disk for SQLite** — simple and cheap, but means the DB lives on a single instance. If horizontal scaling is needed, migrate to a hosted database.
+- **Encoding mojibake in upstream data** — a small number of records from ClinicalTrials.gov contain mangled UTF-8/Latin-1 encoding (e.g. `TÃ¼rkiye` instead of `Türkiye`). This is an upstream API issue, not a pipeline bug. Not fixed to avoid introducing a dependency (`ftfy`) for a rare edge case; revisit if the API doesn't resolve it.
 - **Render free tier spin-down** — the free tier spins down after inactivity, meaning the first request after an idle period takes ~30 seconds to wake up. Currently on the Starter paid tier ($7/month) to avoid this, but worth noting for cost review.
