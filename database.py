@@ -63,6 +63,13 @@ def init_db() -> None:
         conn.execute(CREATE_INDEX)
 
 
+def is_empty() -> bool:
+    """Return True if the trials table has no rows."""
+    with _connect() as conn:
+        count = conn.execute("SELECT COUNT(*) FROM trials").fetchone()[0]
+    return count == 0
+
+
 def _serialize(trial: dict) -> dict:
     """Serialize a normalized trial dict for SQLite storage."""
     row = {}
