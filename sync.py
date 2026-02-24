@@ -9,7 +9,7 @@ from fetcher import fetch_trials
 from normalizer import normalize
 
 
-def main() -> None:
+def main() -> int:
     yesterday = (date.today() - timedelta(days=1)).isoformat()
     print(f"Syncing trials updated since {yesterday} …\n")
 
@@ -22,6 +22,7 @@ def main() -> None:
         count += 1
 
     print(f"\nDone. {count} trial(s) updated.")
+    return count
 
 
 if __name__ == "__main__":
