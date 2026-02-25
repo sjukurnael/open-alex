@@ -58,6 +58,7 @@ def _connect() -> sqlite3.Connection:
 
 def init_db() -> None:
     """Create table and index if they don't exist."""
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with _connect() as conn:
         conn.execute(CREATE_TABLE)
         conn.execute(CREATE_INDEX)
