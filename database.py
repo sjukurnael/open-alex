@@ -6,7 +6,7 @@ import json
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent / "trials.db"
+DB_PATH = Path("/data/trials.db")
 
 # List fields that are stored as JSON strings in SQLite
 LIST_FIELDS = {
